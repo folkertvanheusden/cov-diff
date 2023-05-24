@@ -1,18 +1,18 @@
 #! /usr/bin/python3
 
-import xml.etree.ElementTree as ET
+from lxml import etree
 
-tree1 = ET.parse('1.xml')
+tree1 = etree.parse('1.xml')
 root1 = tree1.getroot()
 
-tree2 = ET.parse('2.xml')
+tree2 = etree.parse('2.xml')
 root2 = tree2.getroot()
 
-tree3 = ET.parse('2.xml')
+tree3 = etree.parse('2.xml')
 root3 = tree2.getroot()
 
 def has_module(root, name):
-    for result in root1.iter('modules'):
+    for result in root.iter('modules'):
         for module in result:
             if module.attrib["name"] == name:
                 return module
@@ -25,8 +25,8 @@ def has_function(root, module_name, function_name):
     if module == None:
         return None
 
-    for functions in module.iter('functions'):
-        for function in functions.iter('function'):
+    for functions in module.iterchildren('functions'):
+        for function in functions.iterchildren('function'):
             if function.attrib['name'] == function_name:
                 return function
 
@@ -38,8 +38,8 @@ def has_range(root, module_name, function_name, range_cmp):
     if function == None:
         return None
 
-    for ranges in function.iter('ranges'):
-        for range in ranges.iter('range'):
+    for ranges in function.iterchildren('ranges'):
+        for range in ranges.iterchildren('range'):
             if range.attrib['source_id'] == range_cmp.attrib['source_id'] and \
                 range.attrib['start_line'] == range_cmp.attrib['start_line'] and \
                 range.attrib['start_column'] == range_cmp.attrib['start_column'] and \
@@ -49,11 +49,7 @@ def has_range(root, module_name, function_name, range_cmp):
 
     return None
 
-root3 = ET.Element('results')
-
-modules3 = ET.SubElement(root3, 'modules')
-
-for result in root1.iter('modules'):
+for result in root1.iterchildren('modules'):
     print(f'processing result {result.tag}')
 
     for module in result:
@@ -66,8 +62,8 @@ for result in root1.iter('modules'):
             # TODO
 
         else:
-            for functions in module.iter('functions'):
-                for function in functions.iter('function'):
+            for functions in module.iterchildren('functions'):
+                for function in functions.iterchildren('function'):
                     function_name = function.attrib['name']
 
                     print(f'\t\t\tprocessing {function_name}')
@@ -79,20 +75,20 @@ for result in root1.iter('modules'):
                         # TODO
 
                     else:
-                        function3 = has_function(tree3, module_name, function_name)
-                        ranges3 = function3.find('ranges')
+                        for ranges in function.iterchildren('ranges'):
+                            delete = []
 
-                        for ranges in function.iter('ranges'):
-                            for range in ranges.iter('range'):
+                            for range in ranges.iterchildren('range'):
                                 opp_range = has_range(tree2, module_name, function_name, range)
 
                                 if not (opp_range == None or range.attrib['covered'] == 'no' or (range.attrib['covered'] == 'no' and opp_range.attrib['covered'] == 'yes')):
                                     print(f'\t\t\t\tremove {range.attrib}')
 
-                                    range3 = has_range(tree3, module_name, function_name, opp_range)
+                                    if opp_range != None:
+                                        delete.append(opp_range)
 
-                                    print(range3)
+                            for ranges in function2.iterchildren('ranges'):
+                                for d in delete:
+                                    ranges.remove(d)
 
-                                    ranges3.remove(range3)
-
-tree3.write('3.xml')
+tree2.write('3.xml')
