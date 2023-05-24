@@ -81,7 +81,7 @@ for result in root1.iterchildren('modules'):
                             for range in ranges.iterchildren('range'):
                                 opp_range = has_range(tree2, module_name, function_name, range)
 
-                                if not (opp_range == None or range.attrib['covered'] == 'no' or (range.attrib['covered'] == 'no' and opp_range.attrib['covered'] == 'yes')):
+                                if range.attrib['covered'] == 'yes' or (opp_range != None and opp_range.attrib['covered'] == 'no'):
                                     print(f'\t\t\t\tremove {range.attrib}')
 
                                     if opp_range != None:
