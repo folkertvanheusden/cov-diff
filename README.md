@@ -17,7 +17,17 @@ Indeed, you need to convert the .coverage-files to xml first ( dotnet-coverage m
 difference.xml can then be converted to a report using the regular "ReportGenerator"-tool (https://reportgenerator.io/).
 What has been tested in the first run (e.g. in your unittests) is not colored. What has been tested in the second run but not in the first is green and not tested in both is red.
 
+
+prerequisites
+-------------
+
 You need python3 for this.
+
+
+slow?
+----
+
+Yes, it may be slower than neccessary and yes there are plenty ways of optimize it. I'll happily accept patches for that :-)
 
 
 example
