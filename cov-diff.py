@@ -1,15 +1,13 @@
 #! /usr/bin/python3
 
 from lxml import etree
+import sys
 
-tree1 = etree.parse('1.xml')
+tree1 = etree.parse(sys.argv[1])
 root1 = tree1.getroot()
 
-tree2 = etree.parse('2.xml')
+tree2 = etree.parse(sys.argv[2])
 root2 = tree2.getroot()
-
-tree3 = etree.parse('2.xml')
-root3 = tree2.getroot()
 
 def has_module(root, name):
     for result in root.iter('modules'):
@@ -45,7 +43,7 @@ def has_range(root, module_name, function_name, range_cmp):
                 range.attrib['start_column'] == range_cmp.attrib['start_column'] and \
                 range.attrib['end_line'] == range_cmp.attrib['end_line'] and \
                 range.attrib['end_column'] == range_cmp.attrib['end_column']:
-                    return range
+                    return (ranges, range)
 
     return None
 
@@ -76,19 +74,12 @@ for result in root1.iterchildren('modules'):
 
                     else:
                         for ranges in function.iterchildren('ranges'):
-                            delete = []
-
                             for range in ranges.iterchildren('range'):
                                 opp_range = has_range(tree2, module_name, function_name, range)
 
-                                if range.attrib['covered'] == 'yes' or (opp_range != None and opp_range.attrib['covered'] == 'no'):
-                                    print(f'\t\t\t\tremove {range.attrib}')
+                                if range.attrib['covered'] == 'yes' and not opp_range is None:
+                                    print(f'\t\t\t\tremove {range.attrib} from {function2}')
 
-                                    if opp_range != None:
-                                        delete.append(opp_range)
+                                    opp_range[0].remove(opp_range[1])
 
-                            for ranges in function2.iterchildren('ranges'):
-                                for d in delete:
-                                    ranges.remove(d)
-
-tree2.write('3.xml')
+tree2.write(sys.argv[3])
